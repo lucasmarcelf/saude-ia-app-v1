@@ -176,6 +176,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Config do LibreLinkUp
 LIBRELINKUP_EMAIL = os.getenv('LIBRE_EMAIL')
 LIBRELINKUP_PASSWORD = os.getenv('LIBRE_PASSWORD')
+LIBRELINKUP_API_URL = os.getenv('LIBRE_REGION')
 
 # Timezone BR
 LANGUAGE_CODE = 'pt-br'
