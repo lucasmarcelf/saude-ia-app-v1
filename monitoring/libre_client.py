@@ -1,14 +1,21 @@
-from django.conf import settings
-from pylibrelinkup import PyLibreLinkUp
+from pylibrelinkup import LibreLinkUpClient, APIUrl
+from pylibrelinkup.exceptions import RedirectError
+import os
 
+def get_libre_client():
+    email = os.getenv("LIBRE_EMAIL")
+    password = os.getenv("LIBRE_PASSWORD")
+    region_env = os.getenv("LIBRE_REGION", "LA")  # já assume LA por padrão
 
-def get_libre_client() -> PyLibreLinkUp:
-    email = settings.LIBRELINKUP_EMAIL
-    password = settings.LIBRELINKUP_PASSWORD
+    api_url = APIUrl.from_string(region_env.upper())
 
-    if not email or not password:
-        raise RuntimeError("LIBRE_EMAIL ou LIBRE_PASSWORD não configurados no .env")
+    client = LibreLinkUpClient(email=email, password=password, api=api_url)
+    try:
+        client.authenticate()
+    except RedirectError as e:
+        # Em último caso, se ainda der redirect, usa o valor sugerido pela API
+        new_api_url = e.args[0]
+        client = LibreLinkUpClient(email=email, password=password, api=new_api_url)
+        client.authenticate()
 
-    client = PyLibreLinkUp(email=email, password=password)
-    client.authenticate()
     return client
