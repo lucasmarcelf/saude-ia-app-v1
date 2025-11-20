@@ -24,3 +24,11 @@ def rebuild_patient_state_task():
     Opcional: recalcula o estado derivado dos pacientes (has_glucose_data etc).
     """
     call_command("rebuild_patient_glucose_state")
+
+@shared_task
+def health_ping():
+    """
+    Task mínima usada pelo /health/ para verificar
+    se o worker do Celery está aceitando jobs.
+    """
+    return "pong"
