@@ -20,12 +20,17 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
-from monitoring.health import health_check
+from monitoring.health import HealthCheckView
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+    SpectacularRedocView,
+)
 
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("health/", health_check, name="health"),
+    path("health/", HealthCheckView.as_view(), name="health"),
 
     # Auth JWT
     path("api/v1/auth/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
@@ -35,5 +40,16 @@ urlpatterns = [
     path("api/v1/", include("monitoring.urls")),
 
     # (Opcional) Alias legado sem versão, por favor remover depois
-    path("api/", include("monitoring.urls")),
+    # path("api/", include("monitoring.urls")),
+
+    # === OpenAPI / Swagger / Redoc ===
+    path("api/v1/schema/", SpectacularAPIView.as_view(), 
+        name="schema"
+    ),
+    path("api/v1/docs/swagger/", SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger-ui",
+    ),
+    path("api/v1/docs/redoc/", SpectacularRedocView.as_view(url_name="schema"),
+        name="redoc",
+    ),
 ]

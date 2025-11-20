@@ -2,7 +2,12 @@
 from rest_framework import serializers
 from .models import Patient, GlucoseReading
 
-
+class HealthStatusSerializer(serializers.Serializer):
+    django = serializers.CharField()
+    postgres = serializers.CharField()
+    redis = serializers.CharField()
+    celery = serializers.CharField()
+    
 class PatientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient

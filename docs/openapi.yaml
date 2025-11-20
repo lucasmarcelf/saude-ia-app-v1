@@ -12,7 +12,10 @@ servers:
     description: Ambiente de produção
     variables:
       host:
-        default: 127.0.0.1
+        default: 0.0.0.0
+
+security:
+  - bearerAuth: []
 
 tags:
   - name: Auth
@@ -29,7 +32,8 @@ paths:
     get:
       tags: [Health]
       summary: Verificar saúde da aplicação
-      operationId: healthCheck
+      operationId: HealthCheckView
+      security: []
       responses:
         "200":
           description: Estado dos serviços internos
@@ -43,6 +47,7 @@ paths:
       tags: [Auth]
       summary: Obter tokens JWT (access + refresh)
       operationId: obtainTokenPair
+      security: []
       requestBody:
         description: Credenciais de autenticação
         required: true
@@ -65,6 +70,7 @@ paths:
       tags: [Auth]
       summary: Renovar access token a partir do refresh token
       operationId: refreshToken
+      security: []
       requestBody:
         required: true
         content:

@@ -1,39 +1,53 @@
-# monitoring/health.py
-from django.http import JsonResponse
-from django.db import connections
-from django.db.utils import OperationalError
 import os
 import redis
+from django.db import connections
+from django.db.utils import OperationalError
 
-from .tasks import health_ping  # vamos criar já já
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+
+from .tasks import health_ping
+from .serializers import HealthStatusSerializer
 
 
-def health_check(request):
-    status = {"django": "ok"}
+class HealthCheckView(APIView):
+    """
+    Healthcheck simples da aplicação.
+    - Verifica Django, Postgres, Redis e Celery.
+    - Não exige autenticação (público).
+    """
+    permission_classes = [AllowAny]
+    authentication_classes = []  # ignora autenticação padrão do DRF
 
-    # Check Postgres
-    try:
-        db_conn = connections["default"]
-        db_conn.cursor()
-        status["postgres"] = "ok"
-    except OperationalError:
-        status["postgres"] = "error"
+    def get(self, request):
+        status = {"django": "ok"}
 
-    # Check Redis (broker do Celery)
-    try:
-        redis_url = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
-        r = redis.Redis.from_url(redis_url)
-        r.ping()
-        status["redis"] = "ok"
-    except Exception:
-        status["redis"] = "error"
+        # Postgres
+        try:
+            db_conn = connections["default"]
+            db_conn.cursor()
+            status["postgres"] = "ok"
+        except OperationalError:
+            status["postgres"] = "error"
 
-    # Check Celery (bonus) – ver se o worker consegue receber uma task
-    try:
-        result = health_ping.delay()
-        # não vamos esperar o resultado, só testar se conseguimos enfileirar
-        status["celery"] = "ok"
-    except Exception:
-        status["celery"] = "error"
+        # Redis
+        try:
+            redis_url = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+            r = redis.Redis.from_url(redis_url)
+            r.ping()
+            status["redis"] = "ok"
+        except Exception:
+            status["redis"] = "error"
 
-    return JsonResponse(status)
+        # Celery
+        try:
+            result = health_ping.delay()
+            # não esperamos resposta; só testamos enfileiramento
+            status["celery"] = "ok"
+        except Exception:
+            status["celery"] = "error"
+
+        # usa o serializer só pra documentar o formato
+        serializer = HealthStatusSerializer(status)
+        return Response(serializer.data)

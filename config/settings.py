@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'monitoring',
     'rest_framework',
     'rest_framework_simplejwt',
+    'drf_spectacular',
+    'drf_spectacular_sidecar', # para servir a UI do Swagger/Redoc com collectstatic
 ]
 
 MIDDLEWARE = [
@@ -135,6 +137,7 @@ REST_FRAMEWORK = {
         'user': '600/min',   # 600 req/min por token autenticado (ajusta depois)
         'anon': '10/min',    # 10 req/min pra quem não está autenticado
     },
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 SIMPLE_JWT = {
@@ -197,4 +200,15 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'monitoring.tasks.rebuild_patient_state_task',
         'schedule': crontab(hour=3, minute=0),  # todo dia às 3:00 AM
     },
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Saúde-IA API",
+    "DESCRIPTION": "API para monitoramento e análise de dados de glicose sincronizados via LibreLinkUp.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    # usando os assets do sidecar:
+    "SWAGGER_UI_DIST": "SIDECAR",
+    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
+    "REDOC_DIST": "SIDECAR",
 }
