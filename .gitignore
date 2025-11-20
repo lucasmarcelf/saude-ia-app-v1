@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.log
+
+# Virtualenv
+venv/
+.env
+.env.*
+!.env.example
+
+# Django stuff
+db.sqlite3
+celerybeat-schedule
+
+# Static & media (se usar mais tarde)
+staticfiles/
+media/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
