@@ -1,4 +1,4 @@
-# Saúde-IA API — Documentação (v1)
+# Saúde-IA API — Documentação (v1) REVISÃO 1
 
 Esta é a documentação oficial da API utilizada para ingestão e consulta de dados de glicose provenientes do LibreLinkUp.
 
