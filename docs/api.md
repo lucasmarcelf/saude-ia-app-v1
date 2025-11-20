@@ -1,4 +1,4 @@
-# 📡 Saúde-IA API — Documentação (v1)
+# Saúde-IA API — Documentação (v1)
 
 Esta é a documentação oficial da API utilizada para ingestão e consulta de dados de glicose provenientes do LibreLinkUp.
 
@@ -48,7 +48,7 @@ Authorization: Bearer <ACCESS_TOKEN>
 {"django":"ok","postgres":"ok","redis":"ok","celery":"ok"}
 ```
 
-# 👥 Pacientes
+# Pacientes
 
 ## Listar pacientes
 `GET /api/v1/patients/`
