@@ -1,0 +1,493 @@
+openapi: 3.0.3
+info:
+  title: Saúde-IA API
+  version: "1.0.0"
+  description: |
+    API para monitoramento e análise de dados de glicose sincronizados via LibreLinkUp.
+
+servers:
+  - url: http://localhost:8000
+    description: Ambiente de desenvolvimento
+  - url: http://{host}
+    description: Ambiente de produção
+    variables:
+      host:
+        default: 127.0.0.1
+
+tags:
+  - name: Auth
+    description: Autenticação JWT
+  - name: Health
+    description: Healthcheck da aplicação
+  - name: Patients
+    description: Endpoints relacionados a pacientes
+  - name: Glucose
+    description: Endpoints relacionados a medições de glicose
+
+paths:
+  /health/:
+    get:
+      tags: [Health]
+      summary: Verificar saúde da aplicação
+      operationId: healthCheck
+      responses:
+        "200":
+          description: Estado dos serviços internos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /api/v1/auth/token/:
+    post:
+      tags: [Auth]
+      summary: Obter tokens JWT (access + refresh)
+      operationId: obtainTokenPair
+      requestBody:
+        description: Credenciais de autenticação
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenObtainRequest"
+      responses:
+        "200":
+          description: Tokens válidos retornados
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenPair"
+        "401":
+          description: Credenciais inválidas
+
+  /api/v1/auth/token/refresh/:
+    post:
+      tags: [Auth]
+      summary: Renovar access token a partir do refresh token
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenRefreshRequest"
+      responses:
+        "200":
+          description: Novo access token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenRefreshResponse"
+        "401":
+          description: Refresh token inválido ou expirado
+
+  /api/v1/patients/:
+    get:
+      tags: [Patients]
+      summary: Listar pacientes
+      operationId: listPatients
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Lista de pacientes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Patient"
+
+  /api/v1/patients/summary/:
+    get:
+      tags: [Patients]
+      summary: Resumo geral de pacientes e dados de glicose
+      operationId: patientsSummary
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Resumo agregado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientsSummary"
+
+  /api/v1/patients/{libre_patient_id}/:
+    get:
+      tags: [Patients]
+      summary: Detalhes de um paciente
+      operationId: retrievePatient
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: libre_patient_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID do paciente no LibreLinkUp
+      responses:
+        "200":
+          description: Dados do paciente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Patient"
+        "404":
+          description: Paciente não encontrado
+
+  /api/v1/patients/{libre_patient_id}/glucose_stats/:
+    get:
+      tags: [Patients]
+      summary: Estatísticas de glicose para um paciente
+      operationId: patientGlucoseStats
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: libre_patient_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID do paciente no LibreLinkUp
+        - in: query
+          name: days
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 7
+          description: Janela de tempo em dias para cálculo das estatísticas
+      responses:
+        "200":
+          description: Estatísticas calculadas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GlucoseStats"
+        "404":
+          description: Paciente não encontrado ou sem dados
+
+  /api/v1/patients/{libre_patient_id}/glucose_history/:
+    get:
+      tags: [Patients]
+      summary: Histórico de glicose para um paciente
+      operationId: patientGlucoseHistory
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: libre_patient_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID do paciente no LibreLinkUp
+        - in: query
+          name: days
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 7
+          description: Janela de tempo em dias para o histórico
+      responses:
+        "200":
+          description: Histórico de leituras
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientGlucoseHistory"
+        "404":
+          description: Paciente não encontrado ou sem dados
+
+  /api/v1/glucose/:
+    get:
+      tags: [Glucose]
+      summary: Listar todas as leituras de glicose (paginado)
+      operationId: listGlucoseReadings
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+          description: Número da página
+      responses:
+        "200":
+          description: Página de leituras de glicose
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedGlucoseReadingList"
+
+  /api/v1/glucose/latest/:
+    get:
+      tags: [Glucose]
+      summary: Última leitura de glicose por paciente
+      operationId: latestGlucosePerPatient
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Lista da última leitura de cada paciente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LatestGlucoseForPatient"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    TokenObtainRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    TokenPair:
+      type: object
+      properties:
+        access:
+          type: string
+          description: Access token JWT
+        refresh:
+          type: string
+          description: Refresh token JWT
+
+    TokenRefreshRequest:
+      type: object
+      required:
+        - refresh
+      properties:
+        refresh:
+          type: string
+          description: Refresh token JWT
+
+    TokenRefreshResponse:
+      type: object
+      properties:
+        access:
+          type: string
+
+    HealthStatus:
+      type: object
+      properties:
+        django:
+          type: string
+          example: ok
+        postgres:
+          type: string
+          example: ok
+        redis:
+          type: string
+          example: ok
+        celery:
+          type: string
+          example: ok
+
+    Patient:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID interno do paciente no banco
+          example: 1
+        first_name:
+          type: string
+          example: Lucas
+        last_name:
+          type: string
+          example: Emmanuel
+        libre_connection_id:
+          type: string
+          format: uuid
+          description: ID da conexão no LibreLinkUp
+        libre_patient_id:
+          type: string
+          format: uuid
+          description: ID do paciente no LibreLinkUp
+        has_glucose_data:
+          type: boolean
+          description: Se o paciente possui dados de glicose no sistema
+        first_glucose_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp da primeira leitura conhecida
+        last_glucose_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp da última leitura conhecida
+
+    PatientsSummary:
+      type: object
+      properties:
+        total_patients:
+          type: integer
+        patients_with_glucose:
+          type: integer
+        patients_without_glucose:
+          type: integer
+        latest_glucose_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    GlucoseReading:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 42
+        patient:
+          $ref: "#/components/schemas/PatientShort"
+        timestamp:
+          type: string
+          format: date-time
+          description: Data/hora da medição
+        value_mg_dl:
+          type: number
+          format: float
+          description: Valor de glicose em mg/dL
+          example: 106.0
+        is_low:
+          type: boolean
+        is_high:
+          type: boolean
+        trend:
+          type: string
+          description: Tendência da glicose (ex. STABLE, RISING, FALLING)
+          example: STABLE
+
+    PatientShort:
+      type: object
+      properties:
+        libre_patient_id:
+          type: string
+          format: uuid
+        first_name:
+          type: string
+        last_name:
+          type: string
+
+    GlucoseStats:
+      type: object
+      properties:
+        patient:
+          $ref: "#/components/schemas/PatientShort"
+        window_days:
+          type: integer
+          example: 7
+        count:
+          type: integer
+          description: Número de leituras no período
+        avg_mg_dl:
+          type: number
+          format: float
+          nullable: true
+        min_mg_dl:
+          type: number
+          format: float
+          nullable: true
+        max_mg_dl:
+          type: number
+          format: float
+          nullable: true
+        time_in_range_percent:
+          type: number
+          format: float
+          nullable: true
+        time_below_range_percent:
+          type: number
+          format: float
+          nullable: true
+        time_above_range_percent:
+          type: number
+          format: float
+          nullable: true
+
+    PatientGlucoseHistory:
+      type: object
+      properties:
+        patient:
+          $ref: "#/components/schemas/PatientShort"
+        window_days:
+          type: integer
+        readings:
+          type: array
+          items:
+            $ref: "#/components/schemas/GlucoseReadingWithoutPatient"
+
+    GlucoseReadingWithoutPatient:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        value_mg_dl:
+          type: number
+          format: float
+        is_low:
+          type: boolean
+        is_high:
+          type: boolean
+        trend:
+          type: string
+          example: STABLE
+
+    PaginatedGlucoseReadingList:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          format: uri
+          nullable: true
+        previous:
+          type: string
+          format: uri
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/GlucoseReading"
+
+    LatestGlucoseForPatient:
+      type: object
+      properties:
+        patient:
+          $ref: "#/components/schemas/PatientShort"
+        timestamp:
+          type: string
+          format: date-time
+        value_mg_dl:
+          type: number
+          format: float
+        is_low:
+          type: boolean
+        is_high:
+          type: boolean
+        trend:
+          type: string
+          example: STABLE

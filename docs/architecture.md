@@ -117,7 +117,8 @@ Resposta:
 ---
 
 # Segurança
-	-	JWT para APIs /api/v1/
-	-	ALLOWED_HOSTS com IP/host em .env.prod
-	-	Portainer exposto somente em 9443 → deve ser limitado a IP específico
-	-	Nginx como única porta pública: 80 (ou 443, futuro)
+
+- JWT para APIs /api/v1/
+- ALLOWED_HOSTS com IP/host em .env.prod
+- Portainer exposto somente em 9443 → deve ser limitado a IP específico
+- Nginx como única porta pública: 80 (ou 443, futuro)
