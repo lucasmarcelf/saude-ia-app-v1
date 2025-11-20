@@ -68,6 +68,16 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/custom.conf:ro
     restart: unless-stopped
 
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer-server
+    restart: always
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
 volumes:
   postgres_data:
   celery_beat_schedule:
