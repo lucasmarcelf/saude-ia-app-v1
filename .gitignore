@@ -13,7 +13,7 @@ venv/
 
 # Django stuff
 db.sqlite3
-celerybeat-schedule*
+celerybeat-schedule
 
 # Static & media (se usar mais tarde)
 staticfiles/
