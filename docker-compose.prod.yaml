@@ -65,7 +65,7 @@ services:
       - "80:80"
     volumes:
       - static_volume:/app/staticfiles:ro
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx.conf:/etc/nginx/conf.d/custom.conf:ro
     restart: unless-stopped
 
 volumes:
