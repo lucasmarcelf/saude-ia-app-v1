@@ -19,10 +19,10 @@ services:
     container_name: saude-ia-db
     env_file:
       - .env.prod
-    environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    # environment:
+    #   - POSTGRES_DB=${DB_NAME}
+    #   - POSTGRES_USER=${DB_USER}
+    #   - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
