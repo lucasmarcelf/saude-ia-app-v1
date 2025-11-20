@@ -5,7 +5,7 @@ from pylibrelinkup import PyLibreLinkUp, APIUrl
 def get_libre_client() -> PyLibreLinkUp:
     email = settings.LIBRELINKUP_EMAIL
     password = settings.LIBRELINKUP_PASSWORD
-    # region_env = settings.LIBRELINKUP_API_URL
+    # region = settings.LIBRELINKUP_API_URL
 
     # api = APIUrl.from_string(region_env.upper())
 
