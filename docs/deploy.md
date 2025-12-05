@@ -58,25 +58,25 @@ CELERY_RESULT_BACKEND=redis://redis:6379/0
 ```
 ## Buildar aplicação
 ```bash
-sudo docker compose -f docker-compose.prod.yaml build
+sudo docker-compose -f docker-compose.prod.yaml build
 ```
 
 ## Rodar migrações
 ```bash
-sudo docker compose -f docker-compose.prod.yaml run --rm web python manage.py migrate
+sudo docker-compose -f docker-compose.prod.yaml run --rm web python manage.py migrate
 ```
 
 ## Criar superuser
 ```bash
-sudo docker compose -f docker-compose.prod.yaml run --rm web python manage.py createsuperuser
+sudo docker-compose -f docker-compose.prod.yaml run --rm web python manage.py createsuperuser
 ```
 
 ## Coletar estáticos
 ```bash
-sudo docker compose -f docker-compose.prod.yaml run --rm web python manage.py collectstatic --noinput
+sudo docker-compose -f docker-compose.prod.yaml run --rm web python manage.py collectstatic --noinput
 ```
 
 ## Subir a stack completa
 ```bash
-sudo docker compose -f docker-compose.prod.yaml up -d --build
+sudo docker-compose -f docker-compose.prod.yaml up -d --build
 ```
