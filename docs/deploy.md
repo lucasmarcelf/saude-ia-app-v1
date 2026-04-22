@@ -80,3 +80,25 @@ sudo docker-compose -f docker-compose.prod.yaml run --rm web python manage.py co
 ```bash
 sudo docker-compose -f docker-compose.prod.yaml up -d --build
 ```
+
+### Possible ERROR:
+O que aconteceu:
+Seu traceback mostra explicitamente docker-compose==1.29.2, e esse ramo v1 está em fim de vida; o próprio time do Docker fechou esse problema como “won’t fix” e orientou migrar para Compose v2. A documentação do Fylr descreve exatamente o mesmo sintoma ao recriar containers e aponta a mesma solução: usar docker compose em vez de docker-compose.
+
+O que fazer agora:
+Primeiro, confira se o plugin novo já está instalado:
+
+```bash
+docker compose version
+docker-compose version
+```
+Se o primeiro comando funcionar, use só docker compose daqui para frente. Se não funcionar, instale o pacote/plugin docker-compose-plugin, porque a documentação cita esse plugin como requisito para a solução.
+
+Sequência recomendada:
+Pare e remova os containers antigos criados pelo Compose v1 e depois suba tudo com Compose v2.
+
+```bash
+sudo docker-compose -f docker-compose.prod.yaml down
+sudo docker rm -f saude-ia-db saude-ia-redis saude-ia-portainer 2>/dev/null || true
+sudo docker compose -f docker-compose.prod.yaml up -d
+```
